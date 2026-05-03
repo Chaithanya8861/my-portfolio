@@ -303,19 +303,6 @@
             border-radius: 3px;
         }
 
-        /* Loading Skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 10px;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
         /* Cards Grid */
         .cards-grid {
             display: grid;
@@ -351,14 +338,6 @@
         .card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        .card-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 1rem;
         }
 
         .card i {
@@ -561,14 +540,6 @@
             font-weight: 500;
         }
 
-        /* Resume Button */
-        .resume-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(135deg, #28a745, #20c997);
-        }
-
         /* Footer */
         .footer {
             background: #1a1a2e;
@@ -713,7 +684,7 @@
             <p class="hero-desc">MCA student · BCA graduate · Creative Developer</p>
             <div>
                 <a href="#projects" class="btn btn-primary">View Projects</a>
-                <a href="#resume" class="btn btn-outline" id="resumeBtn">
+                <a href="#" id="resumeBtn" class="btn btn-outline" style="display: none;">
                     <i class="fas fa-download"></i> Download Resume
                 </a>
                 <a href="admin.html" class="btn btn-secondary">Admin Panel</a>
@@ -757,7 +728,7 @@
                         <div class="section-line" style="margin: 0.5rem 0;"></div>
                     </div>
                     <div id="about-text" class="about-text">
-                        <div class="skeleton" style="height: 100px; width: 100%;"></div>
+                        <p>Loading...</p>
                     </div>
                     <div class="about-info">
                         <div class="info-item">
@@ -784,8 +755,8 @@
                         <div class="info-item">
                             <i class="fas fa-code"></i>
                             <div>
-                                <h4>Experience</h4>
-                                <p>Fresher | Passionate Learner</p>
+                                <h4>Skills</h4>
+                                <p>HTML, CSS, JavaScript, Java, Python</p>
                             </div>
                         </div>
                     </div>
@@ -804,9 +775,8 @@
                 <span class="section-tag">My Expertise</span>
                 <h2 class="section-title">Technical Skills</h2>
                 <div class="section-line"></div>
-                <p>Technologies and tools I work with</p>
             </div>
-            <div class="skills-grid" id="skills-list">
+            <div class="skills-grid">
                 <div class="skill-card">
                     <div class="skill-header">
                         <i class="fab fa-html5"></i>
@@ -959,8 +929,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 🔴 REPLACE WITH YOUR ACTUAL FIREBASE CONFIG 🔴
-       const firebaseConfig = {
+        // 🔴 REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG 🔴
+                   const firebaseConfig = {
   apiKey: "AIzaSyBq4Mkupa5z7qKCsE0ji9s1FEuxf__41Cs",
   authDomain: "portfolio-cms-49f6a.firebaseapp.com",
   projectId: "portfolio-cms-49f6a",
@@ -968,7 +938,6 @@
   messagingSenderId: "973511860833",
   appId: "1:973511860833:web:7fd69f2d05da74aacc4020"
 };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -987,20 +956,41 @@
             localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         });
 
-        // Check for saved dark mode preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
             darkModeToggle.querySelector('i').classList.remove('fa-moon');
             darkModeToggle.querySelector('i').classList.add('fa-sun');
         }
 
-        // Resume Download
-        document.getElementById('resumeBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            // You can upload your resume to Google Drive and put the download link here
-            alert('Resume download will be available soon. Please upload your resume to Google Drive and update the link in the code.');
-            // window.open('YOUR_RESUME_GOOGLE_DRIVE_LINK', '_blank');
-        });
+        // Load Resume from Firebase
+        async function loadResume() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'resume'));
+                if (!querySnapshot.empty) {
+                    const resumeData = querySnapshot.docs[0].data();
+                    const resumeBtn = document.getElementById('resumeBtn');
+                    const downloadUrl = resumeData.fileUrl || resumeData.directUrl;
+                    
+                    if (downloadUrl && downloadUrl !== '') {
+                        resumeBtn.style.display = 'inline-flex';
+                        resumeBtn.onclick = (e) => {
+                            e.preventDefault();
+                            window.open(downloadUrl, '_blank');
+                        };
+                        console.log("Resume loaded successfully");
+                    } else {
+                        console.log("No valid download URL found");
+                        resumeBtn.style.display = 'none';
+                    }
+                } else {
+                    console.log("No resume collection found in Firebase");
+                    document.getElementById('resumeBtn').style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error loading resume:", error);
+                document.getElementById('resumeBtn').style.display = 'none';
+            }
+        }
 
         // Load About data
         async function loadAbout() {
@@ -1012,21 +1002,18 @@
                     
                     if (aboutData.profileImage) {
                         document.getElementById('profilePhoto').src = aboutData.profileImage;
-                    } else {
-                        document.getElementById('profilePhoto').src = "https://ui-avatars.com/api/?name=Chaithanya&background=667eea&color=fff&size=200";
                     }
                     
-                    let bioHtml = `<p>${aboutData.bio || 'I\'m a creative developer with a passion for building engaging digital experiences. I specialize in HTML, CSS, JavaScript and responsive UI. Currently pursuing MCA and building projects to strengthen my web development skills.'}</p>`;
+                    let bioHtml = `<p>${aboutData.bio || 'I\'m a creative developer with a passion for building engaging digital experiences. I specialize in HTML, CSS, JavaScript and responsive UI.'}</p>`;
                     if (aboutData.hobby) {
                         bioHtml += `<p><strong>🎨 Hobbies:</strong> ${aboutData.hobby}</p>`;
                     }
                     document.getElementById('about-text').innerHTML = bioHtml;
                 } else {
-                    document.getElementById('profilePhoto').src = "https://ui-avatars.com/api/?name=Chaithanya&background=667eea&color=fff&size=200";
                     document.getElementById('about-text').innerHTML = `
                         <p>Hi! I'm Chaithanya, a creative developer with a passion for building engaging digital experiences.</p>
                         <p>I specialize in HTML, CSS, JavaScript and responsive UI. Currently pursuing MCA and building projects to strengthen my web development skills.</p>
-                        <p><strong>🎨 Hobbies:</strong> Painting, photography, and videography. Check out my art on YouTube (Chaithu's Art Gallery).</p>
+                        <p><strong>🎨 Hobbies:</strong> Painting, photography, and videography.</p>
                     `;
                 }
             } catch (error) {
@@ -1034,7 +1021,7 @@
             }
         }
 
-        // Load items from collections with images
+        // Load items from collections
         async function loadItems(collectionName, containerId, isTimeline = false) {
             try {
                 const querySnapshot = await getDocs(collection(db, collectionName));
@@ -1062,7 +1049,7 @@
                                 <h3>${escapeHtml(data.title || 'Untitled')}</h3>
                                 ${data.date ? `<div class="date">📅 ${escapeHtml(data.date)}</div>` : ''}
                                 <p>${escapeHtml(data.description || '')}</p>
-                                ${data.link ? `<a href="${escapeHtml(data.link)}" target="_blank" style="display:inline-block; margin-top:1rem; color:#667eea; text-decoration:none;">View Project →</a>` : ''}
+                                ${data.link ? `<a href="${escapeHtml(data.link)}" target="_blank" style="color:#667eea; text-decoration:none;">View →</a>` : ''}
                             </div>
                         `;
                         container.appendChild(div);
@@ -1092,7 +1079,7 @@
                             ${data.date ? `<div class="date">📅 ${escapeHtml(data.date)}</div>` : ''}
                             ${techHtml}
                             <p>${escapeHtml(data.description || '')}</p>
-                            ${data.link ? `<a href="${escapeHtml(data.link)}" target="_blank" style="display:inline-block; margin-top:1rem; color:#667eea; text-decoration:none;">View Project →</a>` : ''}
+                            ${data.link ? `<a href="${escapeHtml(data.link)}" target="_blank" style="display:inline-block; margin-top:1rem; color:#667eea; text-decoration:none;">View →</a>` : ''}
                         `;
                         container.appendChild(div);
                     }
@@ -1110,6 +1097,7 @@
         }
 
         // Load all data
+        loadResume();
         loadAbout();
         loadItems('projects', 'projects-list', false);
         loadItems('certificates', 'certificates-list', false);
