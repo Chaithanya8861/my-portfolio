@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Chaithanya Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .nav-link, .logout-btn {
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .glass-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .auth-section {
+            max-width: 450px;
+            margin: 3rem auto;
+            text-align: center;
+        }
+
+        .auth-header i {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .input-group {
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 1rem;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .section-header-crud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .add-btn, .edit-about-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        .edit-about-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .crud-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .edit-btn {
+            background: #007bff;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            max-width: 500px;
+            margin: 3rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .close, .close-about, .close-resume {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        h3 {
+            margin-bottom: 1rem;
+        }
+
+        .about-preview, .resume-preview {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .about-preview img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .preview-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .test-download-btn {
+            margin-left: auto;
+            padding: 0.3rem 1rem;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        small {
+            display: block;
+            color: #666;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Admin Panel</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">View Site</a></li>
+                <li><button id="logoutBtn" class="logout-btn">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Login Section -->
+        <div class="auth-section glass-card" id="authSection">
+            <div class="auth-header">
+                <i class="fas fa-shield-alt"></i>
+                <h2>Admin Access</h2>
+                <p>Please login to manage your portfolio</p>
+            </div>
+            <div class="auth-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="loginEmail" placeholder="Email Address">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="Password">
+                </div>
+                <button id="loginBtn" class="btn-auth">Login</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard" style="display:none">
+            <div class="dashboard-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Content Management</h1>
+                <p>Manage your portfolio content from here</p>
+            </div>
+
+            <!-- Resume Management Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-file-pdf"></i> Resume / CV</h3>
+                    <button class="edit-about-btn" onclick="editResume()">
+                        <i class="fas fa-upload"></i> Update Resume
+                    </button>
+                </div>
+                <div id="resume-preview" class="resume-preview">
+                    <i class="fas fa-file-pdf" style="font-size: 40px; color: #dc3545;"></i>
+                    <div>
+                        <strong>Loading resume information...</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-user"></i> About Me / Profile</h3>
+                    <button class="edit-about-btn" onclick="editAbout()">
+                        <i class="fas fa-edit"></i> Edit About
+                    </button>
+                </div>
+                <div id="about-preview" class="about-preview">
+                    <p>Loading about information...</p>
+                </div>
+            </div>
+
+            <!-- Projects Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-code"></i> Projects</h3>
+                    <button class="add-btn" onclick="showForm('projects')">
+                        <i class="fas fa-plus"></i> Add Project
+                    </button>
+                </div>
+                <div id="projects-crud" class="items-list"></div>
+            </div>
+
+            <!-- Experience Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-briefcase"></i> Experience</h3>
+                    <button class="add-btn" onclick="showForm('experience')">
+                        <i class="fas fa-plus"></i> Add Experience
+                    </button>
+                </div>
+                <div id="experience-crud" class="items-list"></div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-certificate"></i> Certificates</h3>
+                    <button class="add-btn" onclick="showForm('certificates')">
+                        <i class="fas fa-plus"></i> Add Certificate
+                    </button>
+                </div>
+                <div id="certificates-crud" class="items-list"></div>
+            </div>
+
+            <!-- Achievements Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-trophy"></i> Achievements</h3>
+                    <button class="add-btn" onclick="showForm('achievements')">
+                        <i class="fas fa-plus"></i> Add Achievement
+                    </button>
+                </div>
+                <div id="achievements-crud" class="items-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit Items -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Item</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+                <input type="hidden" id="itemType">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="itemTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="itemDesc" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="text" id="itemDate" placeholder="e.g., 2024">
+                </div>
+                <div class="form-group">
+                    <label>Link (optional)</label>
+                    <input type="url" id="itemLink" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Tech Stack (optional)</label>
+                    <input type="text" id="itemTech" placeholder="e.g., HTML, CSS, JS">
+                </div>
+                <div class="form-group">
+                    <label>Image URL (optional)</label>
+                    <input type="url" id="itemImage" placeholder="https://...">
+                    <small>Upload image to Imgur and paste URL here</small>
+                </div>
+                <button type="submit" class="btn-submit">Save Item</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- About Edit Modal -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-edit"></i> Edit About Me</h3>
+                <span class="close-about">&times;</span>
+            </div>
+            <form id="aboutForm">
+                <div class="form-group">
+                    <label>Profile Image URL</label>
+                    <input type="url" id="aboutImageUrl" placeholder="https://...">
+                    <small>Upload photo to Imgur and paste URL here</small>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="aboutName" placeholder="Chaithanya">
+                </div>
+                <div class="form-group">
+                    <label>Bio / About Text</label>
+                    <textarea id="aboutBio" rows="6" placeholder="Write something about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Hobbies / Interests</label>
+                    <input type="text" id="aboutHobby" placeholder="e.g., Painting, Photography, Coding">
+                </div>
+                <button type="submit" class="btn-submit">Save About</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resume Edit Modal -->
+    <div id="resumeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-pdf"></i> Manage Resume</h3>
+                <span class="close-resume">&times;</span>
+            </div>
+            <form id="resumeForm">
+                <div class="form-group">
+                    <label>Resume Title</label>
+                    <input type="text" id="resumeTitle" placeholder="e.g., Chaithanya_Resume_2025.pdf">
+                </div>
+                <div class="form-group">
+                    <label>Google Drive Shareable Link</label>
+                    <input type="url" id="resumeUrl" placeholder="https://drive.google.com/file/d/.../view">
+                    <small>1. Upload PDF to Google Drive</small>
+                    <small>2. Right-click → Share → "Anyone with link"</small>
+                    <small>3. Copy link and paste above</small>
+                </div>
+                <div class="form-group">
+                    <label>OR Direct PDF URL (GitHub/Cloudinary)</label>
+                    <input type="url" id="resumeDirectUrl" placeholder="https://.../resume.pdf">
+                </div>
+                <button type="submit" class="btn-submit">Save Resume</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // 🔴 REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG 🔴
+              const firebaseConfig = {
+  apiKey: "AIzaSyBq4Mkupa5z7qKCsE0ji9s1FEuxf__41Cs",
+  authDomain: "portfolio-cms-49f6a.firebaseapp.com",
+  projectId: "portfolio-cms-49f6a",
+  storageBucket: "portfolio-cms-49f6a.firebasestorage.app",
+  messagingSenderId: "973511860833",
+  appId: "1:973511860833:web:7fd69f2d05da74aacc4020"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let aboutDocId = null;
+        let resumeDocId = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadAllData();
+                loadAboutPreview();
+                loadResumePreview();
+            } else {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+
+        document.getElementById('loginBtn').onclick = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                alert('Login successful!');
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        };
+
+        document.getElementById('logoutBtn').onclick = async () => {
+            await signOut(auth);
+            alert('Logged out');
+        };
+
+        // Load Resume Preview
+        async function loadResumePreview() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'resume'));
+                const previewDiv = document.getElementById('resume-preview');
+                
+                if (!querySnapshot.empty) {
+                    const data = querySnapshot.docs[0].data();
+                    resumeDocId = querySnapshot.docs[0].id;
+                    const downloadUrl = data.fileUrl || data.directUrl;
+                    previewDiv.innerHTML = `
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #dc3545;"></i>
+                        <div>
+                            <strong>${data.title || 'Resume'}</strong>
+                            <p>✅ Resume is ready for download</p>
+                            <small>Last updated: ${data.updatedAt ? new Date(data.updatedAt.toDate()).toLocaleDateString() : 'Recently'}</small>
+                        </div>
+                        <button onclick="window.open('${downloadUrl}', '_blank')" style="margin-left: auto; padding: 0.3rem 1rem; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Download</button>
+                    `;
+                } else {
+                    previewDiv.innerHTML = `
+                        <i class="fas fa-file-pdf" style="font-size: 40px; color: #dc3545;"></i>
+                        <div>
+                            <strong>No resume uploaded yet</strong>
+                            <p>Click "Update Resume" to add your CV</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error loading resume:", error);
+            }
+        }
+
+        // Load About Preview
+        async function loadAboutPreview() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'about'));
+                const previewDiv = document.getElementById('about-preview');
+                
+                if (!querySnapshot.empty) {
+                    const data = querySnapshot.docs[0].data();
+                    aboutDocId = querySnapshot.docs[0].id;
+                    previewDiv.innerHTML = `
+                        ${data.profileImage ? `<img src="${data.profileImage}" class="preview-image" alt="Profile">` : '<i class="fas fa-user-circle" style="font-size: 60px; color: #667eea;"></i>'}
+                        <div>
+                            <strong>${data.fullName || 'Chaithanya'}</strong>
+                            <p>${data.bio ? data.bio.substring(0, 100) + '...' : 'No bio added yet'}</p>
+                            ${data.hobby ? `<small>🎨 ${data.hobby}</small>` : ''}
+                        </div>
+                    `;
+                } else {
+                    previewDiv.innerHTML = `
+                        <i class="fas fa-user-circle" style="font-size: 60px; color: #667eea;"></i>
+                        <div>
+                            <strong>No About Information</strong>
+                            <p>Click "Edit About" to add your profile information</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error loading about:", error);
+            }
+        }
+
+        // Edit Resume function
+        window.editResume = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'resume'));
+                let resumeData = {};
+                
+                if (!querySnapshot.empty) {
+                    resumeDocId = querySnapshot.docs[0].id;
+                    resumeData = querySnapshot.docs[0].data();
+                }
+                
+                document.getElementById('resumeTitle').value = resumeData.title || '';
+                document.getElementById('resumeUrl').value = resumeData.fileUrl || '';
+                document.getElementById('resumeDirectUrl').value = resumeData.directUrl || '';
+                document.getElementById('resumeModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading resume: ' + error.message);
+            }
+        };
+
+        // Save Resume
+        document.getElementById('resumeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const resumeData = {
+                title: document.getElementById('resumeTitle').value,
+                fileUrl: document.getElementById('resumeUrl').value,
+                directUrl: document.getElementById('resumeDirectUrl').value,
+                updatedAt: new Date()
+            };
+            
+            try {
+                if (resumeDocId) {
+                    await updateDoc(doc(db, 'resume', resumeDocId), resumeData);
+                } else {
+                    await addDoc(collection(db, 'resume'), { ...resumeData, createdAt: new Date() });
+                }
+                document.getElementById('resumeModal').style.display = 'none';
+                alert('Resume saved successfully!');
+                loadResumePreview();
+            } catch (error) {
+                alert('Error saving resume: ' + error.message);
+            }
+        };
+
+        // Edit About function
+        window.editAbout = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'about'));
+                let aboutData = {};
+                
+                if (!querySnapshot.empty) {
+                    aboutDocId = querySnapshot.docs[0].id;
+                    aboutData = querySnapshot.docs[0].data();
+                }
+                
+                document.getElementById('aboutImageUrl').value = aboutData.profileImage || '';
+                document.getElementById('aboutName').value = aboutData.fullName || '';
+                document.getElementById('aboutBio').value = aboutData.bio || '';
+                document.getElementById('aboutHobby').value = aboutData.hobby || '';
+                document.getElementById('aboutModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading about: ' + error.message);
+            }
+        };
+
+        // Save About
+        document.getElementById('aboutForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const aboutData = {
+                fullName: document.getElementById('aboutName').value,
+                profileImage: document.getElementById('aboutImageUrl').value,
+                bio: document.getElementById('aboutBio').value,
+                hobby: document.getElementById('aboutHobby').value,
+                updatedAt: new Date()
+            };
+            
+            try {
+                if (aboutDocId) {
+                    await updateDoc(doc(db, 'about', aboutDocId), aboutData);
+                } else {
+                    await addDoc(collection(db, 'about'), { ...aboutData, createdAt: new Date() });
+                }
+                document.getElementById('aboutModal').style.display = 'none';
+                alert('About information saved!');
+                loadAboutPreview();
+            } catch (error) {
+                alert('Error saving about: ' + error.message);
+            }
+        };
+
+        async function loadAllData() {
+            await loadCRUDItems('projects', 'projects-crud');
+            await loadCRUDItems('experience', 'experience-crud');
+            await loadCRUDItems('certificates', 'certificates-crud');
+            await loadCRUDItems('achievements', 'achievements-crud');
+        }
+
+        async function loadCRUDItems(collectionName, containerId) {
+            try {
+                const querySnapshot = await getDocs(collection(db, collectionName));
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div class="crud-item"><div>No items yet. Click "Add" to create one.</div></div>';
+                    return;
+                }
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = 'crud-item';
+                    div.innerHTML = `
+                        <div style="flex: 1;">
+                            <strong>${escapeHtml(data.title || 'Untitled')}</strong>
+                            <p style="margin-top: 0.25rem;">${data.description ? escapeHtml(data.description.substring(0, 100)) : ''}...</p>
+                            ${data.tech ? `<small>💻 ${escapeHtml(data.tech)}</small>` : ''}
+                        </div>
+                        <div>
+                            <button class="edit-btn" onclick='editItem("${collectionName}", "${docSnap.id}")'>Edit</button>
+                            <button class="delete-btn" onclick='deleteItem("${collectionName}", "${docSnap.id}")'>Delete</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error loading items:", error);
+            }
+        }
+
+        window.editItem = async (type, id) => {
+            try {
+                const docRef = doc(db, type, id);
+                const docSnap = await getDoc(docRef);
+                const data = docSnap.data();
+                
+                document.getElementById('modalTitle').innerText = `Edit ${type}`;
+                document.getElementById('itemType').value = type;
+                document.getElementById('itemId').value = id;
+                document.getElementById('itemTitle').value = data.title || '';
+                document.getElementById('itemDesc').value = data.description || '';
+                document.getElementById('itemDate').value = data.date || '';
+                document.getElementById('itemLink').value = data.link || '';
+                document.getElementById('itemTech').value = data.tech || '';
+                document.getElementById('itemImage').value = data.image || '';
+                document.getElementById('itemModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading item: ' + error.message);
+            }
+        };
+
+        window.deleteItem = async (type, id) => {
+            if (confirm('Delete this item? This action cannot be undone.')) {
+                try {
+                    await deleteDoc(doc(db, type, id));
+                    alert('Item deleted successfully!');
+                    loadAllData();
+                } catch (error) {
+                    alert('Error deleting item: ' + error.message);
+                }
+            }
+        };
+
+        window.showForm = (type) => {
+            document.getElementById('modalTitle').innerText = `Add ${type}`;
+            document.getElementById('itemType').value = type;
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemModal').style.display = 'block';
+        };
+
+        document.getElementById('itemForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('itemType').value;
+            const id = document.getElementById('itemId').value;
+            const data = {
+                title: document.getElementById('itemTitle').value,
+                description: document.getElementById('itemDesc').value,
+                date: document.getElementById('itemDate').value,
+                link: document.getElementById('itemLink').value,
+                tech: document.getElementById('itemTech').value,
+                image: document.getElementById('itemImage').value,
+                updatedAt: new Date()
+            };
+            
+            try {
+                if (id) {
+                    await updateDoc(doc(db, type, id), data);
+                    alert('Item updated successfully!');
+                } else {
+                    await addDoc(collection(db, type), { ...data, createdAt: new Date() });
+                    alert('Item added successfully!');
+                }
+                document.getElementById('itemModal').style.display = 'none';
+                loadAllData();
+            } catch (error) {
+                alert('Error saving item: ' + error.message);
+            }
+        };
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modals
+        document.querySelector('.close').onclick = () => {
+            document.getElementById('itemModal').style.display = 'none';
+        };
+        
+        document.querySelector('.close-about').onclick = () => {
+            document.getElementById('aboutModal').style.display = 'none';
+        };
+        
+        document.querySelector('.close-resume').onclick = () => {
+            document.getElementById('resumeModal').style.display = 'none';
+        };
+        
+        // Click outside modal to close
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
