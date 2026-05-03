@@ -202,7 +202,7 @@
             margin-bottom: 1rem;
         }
 
-        .close, .close-about, .close-resume {
+        .close, .close-about, .close-resume, .close-skill {
             font-size: 1.5rem;
             cursor: pointer;
         }
@@ -217,7 +217,7 @@
             font-weight: 500;
         }
 
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid #ddd;
@@ -258,21 +258,21 @@
             object-fit: cover;
         }
 
-        .preview-image {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
+        .skill-preview {
+            width: 100%;
         }
 
-        .test-download-btn {
-            margin-left: auto;
-            padding: 0.3rem 1rem;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .skill-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 8px;
+        }
+
+        .skill-progress {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 8px;
+            border-radius: 10px;
         }
 
         small {
@@ -357,6 +357,17 @@
                 </div>
             </div>
 
+            <!-- Skills Section -->
+            <div class="glass-card">
+                <div class="section-header-crud">
+                    <h3><i class="fas fa-code"></i> Skills</h3>
+                    <button class="add-btn" onclick="showSkillForm()">
+                        <i class="fas fa-plus"></i> Add Skill
+                    </button>
+                </div>
+                <div id="skills-crud" class="items-list"></div>
+            </div>
+
             <!-- Projects Section -->
             <div class="glass-card">
                 <div class="section-header-crud">
@@ -436,7 +447,6 @@
                 <div class="form-group">
                     <label>Image URL (optional)</label>
                     <input type="url" id="itemImage" placeholder="https://...">
-                    <small>Upload image to Imgur and paste URL here</small>
                 </div>
                 <button type="submit" class="btn-submit">Save Item</button>
             </form>
@@ -488,15 +498,50 @@
                 <div class="form-group">
                     <label>Google Drive Shareable Link</label>
                     <input type="url" id="resumeUrl" placeholder="https://drive.google.com/file/d/.../view">
-                    <small>1. Upload PDF to Google Drive</small>
-                    <small>2. Right-click → Share → "Anyone with link"</small>
-                    <small>3. Copy link and paste above</small>
+                    <small>Upload PDF to Google Drive, share as "Anyone with link", paste here</small>
                 </div>
                 <div class="form-group">
                     <label>OR Direct PDF URL (GitHub/Cloudinary)</label>
                     <input type="url" id="resumeDirectUrl" placeholder="https://.../resume.pdf">
                 </div>
                 <button type="submit" class="btn-submit">Save Resume</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skill Edit Modal -->
+    <div id="skillModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="skillModalTitle">Add Skill</h3>
+                <span class="close-skill">&times;</span>
+            </div>
+            <form id="skillForm">
+                <input type="hidden" id="skillId">
+                <div class="form-group">
+                    <label>Skill Name</label>
+                    <input type="text" id="skillName" placeholder="e.g., JavaScript" required>
+                </div>
+                <div class="form-group">
+                    <label>Icon Class</label>
+                    <input type="text" id="skillIcon" placeholder="e.g., fab fa-js">
+                    <small>Find icons at <a href="https://fontawesome.com/v6/icons" target="_blank">FontAwesome Icons</a></small>
+                    <small>Examples: fab fa-html5, fab fa-css3-alt, fab fa-js, fab fa-python, fab fa-java, fas fa-database</small>
+                </div>
+                <div class="form-group">
+                    <label>Percentage (0-100)</label>
+                    <input type="number" id="skillPercentage" min="0" max="100" placeholder="e.g., 75" required>
+                </div>
+                <div class="form-group">
+                    <label>Level</label>
+                    <select id="skillLevel" required>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Save Skill</button>
             </form>
         </div>
     </div>
@@ -508,7 +553,7 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // 🔴 REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG 🔴
-              const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyBq4Mkupa5z7qKCsE0ji9s1FEuxf__41Cs",
   authDomain: "portfolio-cms-49f6a.firebaseapp.com",
   projectId: "portfolio-cms-49f6a",
@@ -530,6 +575,7 @@
                 loadAllData();
                 loadAboutPreview();
                 loadResumePreview();
+                loadSkills();
             } else {
                 document.getElementById('authSection').style.display = 'block';
                 document.getElementById('dashboard').style.display = 'none';
@@ -552,7 +598,7 @@
             alert('Logged out');
         };
 
-        // Load Resume Preview
+        // ========== RESUME FUNCTIONS ==========
         async function loadResumePreview() {
             try {
                 const querySnapshot = await getDocs(collection(db, 'resume'));
@@ -585,7 +631,50 @@
             }
         }
 
-        // Load About Preview
+        window.editResume = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'resume'));
+                let resumeData = {};
+                
+                if (!querySnapshot.empty) {
+                    resumeDocId = querySnapshot.docs[0].id;
+                    resumeData = querySnapshot.docs[0].data();
+                }
+                
+                document.getElementById('resumeTitle').value = resumeData.title || '';
+                document.getElementById('resumeUrl').value = resumeData.fileUrl || '';
+                document.getElementById('resumeDirectUrl').value = resumeData.directUrl || '';
+                document.getElementById('resumeModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading resume: ' + error.message);
+            }
+        };
+
+        document.getElementById('resumeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const resumeData = {
+                title: document.getElementById('resumeTitle').value,
+                fileUrl: document.getElementById('resumeUrl').value,
+                directUrl: document.getElementById('resumeDirectUrl').value,
+                updatedAt: new Date()
+            };
+            
+            try {
+                if (resumeDocId) {
+                    await updateDoc(doc(db, 'resume', resumeDocId), resumeData);
+                } else {
+                    await addDoc(collection(db, 'resume'), { ...resumeData, createdAt: new Date() });
+                }
+                document.getElementById('resumeModal').style.display = 'none';
+                alert('Resume saved successfully!');
+                loadResumePreview();
+            } catch (error) {
+                alert('Error saving resume: ' + error.message);
+            }
+        };
+
+        // ========== ABOUT FUNCTIONS ==========
         async function loadAboutPreview() {
             try {
                 const querySnapshot = await getDocs(collection(db, 'about'));
@@ -616,52 +705,6 @@
             }
         }
 
-        // Edit Resume function
-        window.editResume = async () => {
-            try {
-                const querySnapshot = await getDocs(collection(db, 'resume'));
-                let resumeData = {};
-                
-                if (!querySnapshot.empty) {
-                    resumeDocId = querySnapshot.docs[0].id;
-                    resumeData = querySnapshot.docs[0].data();
-                }
-                
-                document.getElementById('resumeTitle').value = resumeData.title || '';
-                document.getElementById('resumeUrl').value = resumeData.fileUrl || '';
-                document.getElementById('resumeDirectUrl').value = resumeData.directUrl || '';
-                document.getElementById('resumeModal').style.display = 'block';
-            } catch (error) {
-                alert('Error loading resume: ' + error.message);
-            }
-        };
-
-        // Save Resume
-        document.getElementById('resumeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const resumeData = {
-                title: document.getElementById('resumeTitle').value,
-                fileUrl: document.getElementById('resumeUrl').value,
-                directUrl: document.getElementById('resumeDirectUrl').value,
-                updatedAt: new Date()
-            };
-            
-            try {
-                if (resumeDocId) {
-                    await updateDoc(doc(db, 'resume', resumeDocId), resumeData);
-                } else {
-                    await addDoc(collection(db, 'resume'), { ...resumeData, createdAt: new Date() });
-                }
-                document.getElementById('resumeModal').style.display = 'none';
-                alert('Resume saved successfully!');
-                loadResumePreview();
-            } catch (error) {
-                alert('Error saving resume: ' + error.message);
-            }
-        };
-
-        // Edit About function
         window.editAbout = async () => {
             try {
                 const querySnapshot = await getDocs(collection(db, 'about'));
@@ -682,7 +725,6 @@
             }
         };
 
-        // Save About
         document.getElementById('aboutForm').onsubmit = async (e) => {
             e.preventDefault();
             
@@ -708,6 +750,107 @@
             }
         };
 
+        // ========== SKILLS FUNCTIONS ==========
+        async function loadSkills() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'skills'));
+                const container = document.getElementById('skills-crud');
+                if (!container) return;
+                container.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div class="crud-item"><div>No skills yet. Click "Add Skill" to create one.</div></div>';
+                    return;
+                }
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = 'crud-item';
+                    div.innerHTML = `
+                        <div style="flex: 1;">
+                            <strong><i class="${data.icon || 'fas fa-code'}"></i> ${escapeHtml(data.name || 'Untitled')}</strong>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: ${data.percentage || 0}%;"></div>
+                            </div>
+                            <small>${data.level || 'Beginner'} | ${data.percentage || 0}%</small>
+                        </div>
+                        <div>
+                            <button class="edit-btn" onclick='editSkill("${docSnap.id}")'>Edit</button>
+                            <button class="delete-btn" onclick='deleteSkill("${docSnap.id}")'>Delete</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error loading skills:", error);
+            }
+        }
+
+        window.showSkillForm = () => {
+            document.getElementById('skillModalTitle').innerText = 'Add Skill';
+            document.getElementById('skillId').value = '';
+            document.getElementById('skillForm').reset();
+            document.getElementById('skillModal').style.display = 'block';
+        };
+
+        window.editSkill = async (id) => {
+            try {
+                const docRef = doc(db, 'skills', id);
+                const docSnap = await getDoc(docRef);
+                const data = docSnap.data();
+                
+                document.getElementById('skillModalTitle').innerText = 'Edit Skill';
+                document.getElementById('skillId').value = id;
+                document.getElementById('skillName').value = data.name || '';
+                document.getElementById('skillIcon').value = data.icon || '';
+                document.getElementById('skillPercentage').value = data.percentage || 0;
+                document.getElementById('skillLevel').value = data.level || 'Beginner';
+                document.getElementById('skillModal').style.display = 'block';
+            } catch (error) {
+                alert('Error loading skill: ' + error.message);
+            }
+        };
+
+        window.deleteSkill = async (id) => {
+            if (confirm('Delete this skill? This action cannot be undone.')) {
+                try {
+                    await deleteDoc(doc(db, 'skills', id));
+                    alert('Skill deleted successfully!');
+                    loadSkills();
+                } catch (error) {
+                    alert('Error deleting skill: ' + error.message);
+                }
+            }
+        };
+
+        document.getElementById('skillForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('skillId').value;
+            const skillData = {
+                name: document.getElementById('skillName').value,
+                icon: document.getElementById('skillIcon').value,
+                percentage: parseInt(document.getElementById('skillPercentage').value),
+                level: document.getElementById('skillLevel').value,
+                updatedAt: new Date()
+            };
+            
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'skills', id), skillData);
+                    alert('Skill updated successfully!');
+                } else {
+                    await addDoc(collection(db, 'skills'), { ...skillData, createdAt: new Date() });
+                    alert('Skill added successfully!');
+                }
+                document.getElementById('skillModal').style.display = 'none';
+                loadSkills();
+            } catch (error) {
+                alert('Error saving skill: ' + error.message);
+            }
+        };
+
+        // ========== CRUD FUNCTIONS FOR OTHER SECTIONS ==========
         async function loadAllData() {
             await loadCRUDItems('projects', 'projects-crud');
             await loadCRUDItems('experience', 'experience-crud');
@@ -839,7 +982,10 @@
             document.getElementById('resumeModal').style.display = 'none';
         };
         
-        // Click outside modal to close
+        document.querySelector('.close-skill').onclick = () => {
+            document.getElementById('skillModal').style.display = 'none';
+        };
+        
         window.onclick = (event) => {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';

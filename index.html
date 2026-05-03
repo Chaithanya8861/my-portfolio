@@ -52,14 +52,16 @@
 
         body.dark-mode .card,
         body.dark-mode .timeline-item,
-        body.dark-mode .info-item {
+        body.dark-mode .info-item,
+        body.dark-mode .skill-card {
             background: #0f3460;
             color: #fff;
         }
 
         body.dark-mode .card h3,
         body.dark-mode .timeline-item h3,
-        body.dark-mode .section-title {
+        body.dark-mode .section-title,
+        body.dark-mode .skill-card h3 {
             color: #fff;
         }
 
@@ -383,7 +385,7 @@
         /* Skills Section */
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
         }
 
@@ -392,6 +394,11 @@
             border-radius: 20px;
             padding: 1.5rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
         }
 
         .skill-header {
@@ -404,6 +411,11 @@
         .skill-header i {
             font-size: 2rem;
             color: #667eea;
+        }
+
+        .skill-header h3 {
+            font-size: 1.1rem;
+            margin: 0;
         }
 
         .skill-bar {
@@ -715,9 +727,10 @@
             <div class="about-wrapper">
                 <div class="about-image">
                     <div class="profile-image-container">
-                        <img id="profilePhoto" src="image/profile.jpeg" alt="Chaithanya" class="profile-image">
+                        <img id="profilePhoto" src="images/profile.jpg" alt="Chaithanya" class="profile-image">
                         <div class="profile-overlay">
                             <i class="fas fa-camera"></i>
+                            <span style="color: white; font-size: 12px;">Update in Admin</span>
                         </div>
                     </div>
                 </div>
@@ -755,8 +768,8 @@
                         <div class="info-item">
                             <i class="fas fa-code"></i>
                             <div>
-                                <h4>Skills</h4>
-                                <p>HTML, CSS, JavaScript, Java, Python</p>
+                                <h4>Experience</h4>
+                                <p>Fresher | Passionate Learner</p>
                             </div>
                         </div>
                     </div>
@@ -775,55 +788,17 @@
                 <span class="section-tag">My Expertise</span>
                 <h2 class="section-title">Technical Skills</h2>
                 <div class="section-line"></div>
+                <p>Technologies and tools I work with</p>
             </div>
-            <div class="skills-grid">
+            <div id="skills-list" class="skills-grid">
                 <div class="skill-card">
                     <div class="skill-header">
-                        <i class="fab fa-html5"></i>
-                        <h3>HTML5/CSS3</h3>
+                        <i class="fas fa-spinner fa-pulse"></i>
+                        <h3>Loading skills...</h3>
                     </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div>
-                    <p>Advanced</p>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-header">
-                        <i class="fab fa-js"></i>
-                        <h3>JavaScript</h3>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 50%"></div>
                     </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 75%"></div></div>
-                    <p>Intermediate</p>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-header">
-                        <i class="fab fa-java"></i>
-                        <h3>Java</h3>
-                    </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 70%"></div></div>
-                    <p>Intermediate</p>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-header">
-                        <i class="fab fa-python"></i>
-                        <h3>Python</h3>
-                    </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 65%"></div></div>
-                    <p>Intermediate</p>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-header">
-                        <i class="fab fa-react"></i>
-                        <h3>React JS</h3>
-                    </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 60%"></div></div>
-                    <p>Learning</p>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-header">
-                        <i class="fas fa-database"></i>
-                        <h3>Firebase</h3>
-                    </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 70%"></div></div>
-                    <p>Intermediate</p>
                 </div>
             </div>
         </div>
@@ -930,7 +905,7 @@
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // 🔴 REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG 🔴
-                   const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyBq4Mkupa5z7qKCsE0ji9s1FEuxf__41Cs",
   authDomain: "portfolio-cms-49f6a.firebaseapp.com",
   projectId: "portfolio-cms-49f6a",
@@ -979,11 +954,9 @@
                         };
                         console.log("Resume loaded successfully");
                     } else {
-                        console.log("No valid download URL found");
                         resumeBtn.style.display = 'none';
                     }
                 } else {
-                    console.log("No resume collection found in Firebase");
                     document.getElementById('resumeBtn').style.display = 'none';
                 }
             } catch (error) {
@@ -1018,6 +991,42 @@
                 }
             } catch (error) {
                 console.error("Error loading about:", error);
+            }
+        }
+
+        // Load Skills from Firebase
+        async function loadSkills() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'skills'));
+                const container = document.getElementById('skills-list');
+                if (!container) return;
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div class="skill-card"><p>No skills added yet. Add skills from admin panel.</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const skill = doc.data();
+                    const skillCard = document.createElement('div');
+                    skillCard.className = 'skill-card';
+                    skillCard.style.animation = 'fadeInUp 0.5s ease';
+                    skillCard.innerHTML = `
+                        <div class="skill-header">
+                            <i class="${skill.icon || 'fas fa-code'}"></i>
+                            <h3>${escapeHtml(skill.name || 'Skill')}</h3>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" style="width: ${skill.percentage || 0}%"></div>
+                        </div>
+                        <p>${skill.level || 'Beginner'} | ${skill.percentage || 0}%</p>
+                    `;
+                    container.appendChild(skillCard);
+                });
+            } catch (error) {
+                console.error("Error loading skills:", error);
+                container.innerHTML = '<div class="skill-card"><p>Error loading skills. Please try again later.</p></div>';
             }
         }
 
@@ -1099,6 +1108,7 @@
         // Load all data
         loadResume();
         loadAbout();
+        loadSkills();
         loadItems('projects', 'projects-list', false);
         loadItems('certificates', 'certificates-list', false);
         loadItems('achievements', 'achievements-list', false);
