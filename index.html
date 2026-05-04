@@ -935,16 +935,17 @@
         </div>
     </section>
 
-    <!-- About Section -->
+    <!-- About Section - PROFILE IMAGE IS HARDCODED, WON'T CHANGE -->
     <section id="about" class="section">
         <div class="container">
             <div class="about-wrapper">
                 <div class="about-image">
                     <div class="profile-image-container">
-                        <img id="profilePhoto" src="images/profile.jpg" alt="Chaithanya" class="profile-image">
+                        <!-- HARDCODED PROFILE IMAGE - THIS WILL NEVER CHANGE -->
+                        <img src="image/profile.jpeg" alt="Chaithanya" class="profile-image" style="width:100%; height:auto;">
                         <div class="profile-overlay">
                             <i class="fas fa-camera"></i>
-                            <span>Update in Admin</span>
+                            <span>Profile Photo</span>
                         </div>
                     </div>
                 </div>
@@ -955,7 +956,9 @@
                         <div class="section-line" style="margin: 0.5rem 0;"></div>
                     </div>
                     <div id="about-text" class="about-text">
-                        <p>Loading...</p>
+                        <p>Hi! I'm Chaithanya, a creative developer with a passion for building engaging digital experiences.</p>
+                        <p>I specialize in HTML, CSS, JavaScript and responsive UI. Currently pursuing MCA and building projects to strengthen my web development skills.</p>
+                        <p><strong>🎨 Hobbies:</strong> Painting, photography, and videography. Check out my art on YouTube (Chaithu's Art Gallery).</p>
                     </div>
                     <div class="about-info">
                         <div class="info-item">
@@ -1116,7 +1119,7 @@
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // 🔴 REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG 🔴
-const firebaseConfig = {
+  const firebaseConfig = {
   apiKey: "AIzaSyBq4Mkupa5z7qKCsE0ji9s1FEuxf__41Cs",
   authDomain: "portfolio-cms-49f6a.firebaseapp.com",
   projectId: "portfolio-cms-49f6a",
@@ -1124,7 +1127,6 @@ const firebaseConfig = {
   messagingSenderId: "973511860833",
   appId: "1:973511860833:web:7fd69f2d05da74aacc4020"
 };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -1148,7 +1150,6 @@ const firebaseConfig = {
             localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         });
 
-        // Check saved preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
             updateDarkModeIcon();
@@ -1178,7 +1179,6 @@ const firebaseConfig = {
                 if (href === `#${current}`) {
                     link.classList.add('active');
                 }
-                
                 if (current === 'home' && href === '#home') {
                     link.classList.add('active');
                 }
@@ -1215,36 +1215,8 @@ const firebaseConfig = {
             }
         }
 
-        // Load About data
-        async function loadAbout() {
-            try {
-                const querySnapshot = await getDocs(collection(db, 'about'));
-                
-                if (!querySnapshot.empty) {
-                    const aboutData = querySnapshot.docs[0].data();
-                    
-                    if (aboutData.profileImage) {
-                        document.getElementById('profilePhoto').src = aboutData.profileImage;
-                    }
-                    
-                    let bioHtml = `<p>${aboutData.bio || 'I\'m a creative developer with a passion for building engaging digital experiences. I specialize in HTML, CSS, JavaScript and responsive UI.'}</p>`;
-                    if (aboutData.hobby) {
-                        bioHtml += `<p><strong>🎨 Hobbies:</strong> ${aboutData.hobby}</p>`;
-                    }
-                    document.getElementById('about-text').innerHTML = bioHtml;
-                } else {
-                    document.getElementById('about-text').innerHTML = `
-                        <p>Hi! I'm Chaithanya, a creative developer with a passion for building engaging digital experiences.</p>
-                        <p>I specialize in HTML, CSS, JavaScript and responsive UI. Currently pursuing MCA and building projects to strengthen my web development skills.</p>
-                        <p><strong>🎨 Hobbies:</strong> Painting, photography, and videography. Check out my art on YouTube (Chaithu's Art Gallery).</p>
-                    `;
-                }
-            } catch (error) {
-                console.error("Error loading about:", error);
-            }
-        }
-
-        // Load Skills from Firebase
+        // NOTE: About text is already hardcoded in HTML, no Firebase loading needed
+        // Skills from Firebase
         async function loadSkills() {
             try {
                 const querySnapshot = await getDocs(collection(db, 'skills'));
@@ -1356,7 +1328,6 @@ const firebaseConfig = {
 
         // Load all data
         loadResume();
-        loadAbout();
         loadSkills();
         loadItems('projects', 'projects-list', false);
         loadItems('certificates', 'certificates-list', false);
