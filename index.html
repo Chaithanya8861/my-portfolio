@@ -873,7 +873,7 @@
             .footer-social {
                 justify-content: center;
             }
-            .about-image {
+            .profile-image-container{
     width: 100%;
     height: auto;
     display: block;
@@ -948,16 +948,16 @@
                 <div class="about-image">
                     <div class="profile-image-container">
                         <!-- HARDCODED PROFILE IMAGE - THIS WILL NEVER CHANGE -->
-                       <div class="profile-image-container">
+   <div class="profile-image-container">
     <img src="image/profile.jpeg" 
          alt="Chaithanya" 
          class="profile-image" 
-         style="width:100%; height:auto; border-radius:20px;"
-         onerror="this.src='https://ui-avatars.com/api/?name=Chaithanya&background=667eea&color=fff&size=200&bold=true'">
+         style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%;">
     <div class="profile-overlay">
         <i class="fas fa-camera"></i>
         <span>Profile Photo</span>
     </div>
+</div>
 </div>
                            
                         </div>
